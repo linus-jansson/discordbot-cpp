@@ -27,6 +27,7 @@ public:
 
     void on_open(client * c, websocketpp::connection_hdl hdl) {
         m_status = "Open";
+        
 
         client::connection_ptr con = c->get_con_from_hdl(hdl);
         m_server = con->get_response_header("Server");
@@ -52,9 +53,10 @@ public:
 
     void on_message(websocketpp::connection_hdl, client::message_ptr msg) {
         if (msg->get_opcode() == websocketpp::frame::opcode::text) {
-            m_messages.push_back("<< " + msg->get_payload());
+            const json j( json::parse(msg->get_payload()) );
+            m_messages.push_back(j);
         } else {
-            m_messages.push_back("<< " + websocketpp::utility::to_hex(msg->get_payload()));
+            // m_messages.push_back(websocketpp::utility::to_hex(msg->get_payload()));
         }
     }
 
@@ -70,6 +72,10 @@ public:
         return m_status;
     }
 
+    std::vector<json> get_messages() const {
+        return m_messages;
+    }
+
     void record_sent_message(std::string message) {
         m_messages.push_back(">> " + message);
     }
@@ -82,19 +88,21 @@ private:
     std::string m_uri;
     std::string m_server;
     std::string m_error_reason;
-    std::vector<std::string> m_messages;
+    std::vector<json> m_messages;
 };
 
-std::ostream & operator<< (std::ostream & out, connection_metadata const & data) {
+std::ostream & operator << (std::ostream & out, connection_metadata const & data) {
     out << "> URI: " << data.m_uri << "\n"
         << "> Status: " << data.m_status << "\n"
         << "> Remote Server: " << (data.m_server.empty() ? "None Specified" : data.m_server) << "\n"
         << "> Error/close reason: " << (data.m_error_reason.empty() ? "N/A" : data.m_error_reason) << "\n";
     out << "> Messages Processed: (" << data.m_messages.size() << ") \n";
 
-    std::vector<std::string>::const_iterator it;
-    for (it = data.m_messages.begin(); it != data.m_messages.end(); ++it) {
-        out << *it << "\n";
+    // out << data.m_messages.end() ;
+
+    for( auto& j : data.m_messages )
+    {
+        out << j.dump(4) << '\n';
     }
 
     return out;
@@ -268,6 +276,7 @@ private:
  * (websocketpp.org, for example).
  */
     static context_ptr on_tls_init(/*const char * hostname, websocketpp::connection_hdl*/) {
+
         // context_ptr ctx = websocketpp::lib::make_shared<boost::asio::ssl::context>(boost::asio::ssl::context::sslv23);
 
         // try {
