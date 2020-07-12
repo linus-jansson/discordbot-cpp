@@ -1,6 +1,0 @@
-[submodule "discordbot-cpp/websocketpp"]
-	path = discordbot-cpp/websocketpp
-	url = https://github.com/zaphoyd/websocketpp.git
-[submodule "discordbot-cpp/asio"]
-	path = discordbot-cpp/asio
-	url = https://github.com/chriskohlhoff/asio.git
