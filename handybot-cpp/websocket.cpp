@@ -86,22 +86,33 @@ public:
         //   << websocketpp::close::status::get_string(con->get_remote_close_code())
         //   << "), close reason: " << con->get_remote_close_reason();
         // m_error_reason = s.str();
+        client::connection_ptr con = c->get_con_from_hdl(connection);
 
-        std::cout << "closing..\n"; //<< ws_hdl->get_remote_close_code() << " " << websocketpp::close::status::get_string(con->get_remote_close_code());
+        std::stringstream s;
+        s << "close code: " << con->get_remote_close_code() << " ("
+          << websocketpp::close::status::get_string(con->get_remote_close_code())
+          << "), close reason: " << con->get_remote_close_reason();
+        std::string m_error_reason = s.str();
+        std::cout << "closing.." << m_error_reason << std::endl;
     }
 
     void on_message(websocketpp::connection_hdl, client::message_ptr msg)
     {
 
         /* JSON PARSE CONTENT TO CHECK IF OPCODE == 11. IF IT DOES IT SHOULD DO A HEARTBEAT AFTER THE INTERVALL */
-        // ^^ ?????
+        // ????? ^^ ?????
         if (msg->get_opcode() == websocketpp::frame::opcode::text)
         {
-            m_messages.push_back("<< " + msg->get_payload());
+            ws_messages.push_back(msg->get_payload());
             auto j = nlohmann::json::parse(msg->get_payload());
-            auto k = nlohmann::json::parse(msg->get_payload());
 
             auto opcode = j["op"];
+
+            if (!j["s"].is_null())
+            {
+                heartbeatSeq = j["s"];
+            }
+            
 
             OPCodes code = opcode;
             switch (code)
@@ -117,19 +128,23 @@ public:
             case INVALID_SESSION:
             case HELLO:
                 heartbeatInterval = j["d"]["heartbeat_interval"]; // Store the heatbeat interval for know later how often it should sendHeatbeat();
-            case HEARTBEAT_ACK:
-                std::cout << opcode << "\n";
                 std::cout << heartbeatInterval << std::endl;
-                sendHeartbeat();
+                // identify();
+
+            case HEARTBEAT_ACK:
+                heartbeat(opcode);
+                std::cout << opcode << "\n";
+
+                // sendHeartbeat();
             default:
                 break;
             }
 
-            std::cout << "<< " << j.dump(4) << "\n";
+            // std::cout << "<< " << j.dump(4) << "\n";
         }
         else
         {
-            m_messages.push_back("<< " + websocketpp::utility::to_hex(msg->get_payload()));
+            ws_messages.push_back(websocketpp::utility::to_hex(msg->get_payload()));
             std::cout << "<< " << websocketpp::utility::to_hex(msg->get_payload()) << "\n";
         }
     }
@@ -205,7 +220,7 @@ public:
         this->record_sent_message(message);
     }
 
-    void heartbeat();
+    
 
     // std::string get_status() const
     // {
@@ -214,15 +229,36 @@ public:
 
     void record_sent_message(std::string message)
     {
-        m_messages.push_back(">> " + message);
+        ws_messages.push_back(message);
     }
 
 private:
-    void sendHeartbeat()
+    void sendHeartbeat(int seq)
     {
-        std::string message = "{\"op\":1,\"d\":null}";
+        std::string message = "{\"op\":1,\"s\":null}";
+
+        if (seq <= 0)
+        {
+            auto obj = nlohmann::json::parse(message);
+            obj["s"] = seq;
+
+            message = obj.dump();
+        }
+
+        std::cout << message;
+        
         send(message);
     }
+
+    void heartbeat(int opcode)
+    {
+        if (opcode == 11)
+        {
+            sendHeartbeat(heartbeatSeq);
+        }
+    }
+
+    void identify();
 
     client ws_client;
 
@@ -232,10 +268,12 @@ private:
 
     std::string uri = "wss://gateway.discord.gg/?v=6&encoding=json";
 
-    std::vector<std::string> m_messages;
+    std::vector<nlohmann::json> ws_messages;
 
-    int heartbeatInterval;
-    int heartbeatSeq;
+    int heartbeatInterval = 0;
+    int heartbeatSeq = 0;
+
+    int sessionId = 0;
 
     enum OPCodes
     {
