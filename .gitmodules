@@ -1,0 +1,3 @@
+[submodule "handybot-cpp/websocketpp"]
+	path = handybot-cpp/websocketpp
+	url = https://github.com/zaphoyd/websocketpp.git
