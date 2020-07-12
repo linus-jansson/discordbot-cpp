@@ -21,7 +21,17 @@
 
 #include <iostream>
 
+#include <chrono>
+#include <thread>
+
 typedef websocketpp::client<websocketpp::config::asio_tls_client> client;
+// namespace limpans_tid
+// {
+//     void setTimeout(int time)
+//     {
+//         std::this_thread::sleep_for(std::chrono::milliseconds(time));
+//     }
+// } // namespace limpans_tid
 
 class websocket_endpoint
 {
@@ -108,34 +118,54 @@ public:
 
             auto opcode = j["op"];
 
+            std::cout << j.dump(4) << "\n";
+
             if (!j["s"].is_null())
             {
                 heartbeatSeq = j["s"];
             }
-            
 
             OPCodes code = opcode;
             switch (code)
             {
             case DISPATCH:
+                break;
             case HEARTBEAT:
+                break;
             case IDENTIFY:
+                std::cout << "Succsessfully connected bot\n";
+                break;
             case STATUS_UPDATE:
+                break;
             case VOICE_SERVER_PING:
+                break;
             case RESUME:
+                break;
             case RECONNECT:
+                break;
             case REQUEST_GUILD_MEMBERS:
+                break;
             case INVALID_SESSION:
+
+                // The inner d key is a boolean that indicates whether the session may be resumable.
+                std::this_thread::sleep_for(std::chrono::milliseconds(5100));
+                identify(bot_token);
+                break;
             case HELLO:
                 heartbeatInterval = j["d"]["heartbeat_interval"]; // Store the heatbeat interval for know later how often it should sendHeatbeat();
                 std::cout << heartbeatInterval << std::endl;
-                // identify();
-
-            case HEARTBEAT_ACK:
                 heartbeat(opcode);
-                std::cout << opcode << "\n";
+                identify(bot_token);
+                // identify();
+                break;
+            case HEARTBEAT_ACK:
+                std::this_thread::sleep_for(std::chrono::milliseconds(2500));
+                // limpans_tid::setTimeout(2500);
+                heartbeat(opcode);
+                
 
                 // sendHeartbeat();
+                break;
             default:
                 break;
             }
@@ -220,8 +250,6 @@ public:
         this->record_sent_message(message);
     }
 
-    
-
     // std::string get_status() const
     // {
     //     return m_status;
@@ -235,30 +263,60 @@ public:
 private:
     void sendHeartbeat(int seq)
     {
-        std::string message = "{\"op\":1,\"s\":null}";
+        std::string message = "{\"op\":1,\"d\":null}";
 
-        if (seq <= 0)
+        if (seq < 0)
         {
             auto obj = nlohmann::json::parse(message);
-            obj["s"] = seq;
+            obj["d"] = seq;
 
             message = obj.dump();
         }
 
-        std::cout << message;
-        
+        // std::cout << message;
+
         send(message);
     }
 
     void heartbeat(int opcode)
     {
-        if (opcode == 11)
+        if (opcode == 11 || opcode == 10)
         {
             sendHeartbeat(heartbeatSeq);
         }
     }
 
-    void identify();
+    void identify(std::string _token)
+    {
+        std::string message;
+        nlohmann::json obj;
+
+        obj["op"] = 2;
+        obj["d"]["token"] = _token;
+        obj["d"]["properties"]["$os"] = "linux";
+        obj["d"]["properties"]["$browser"] = "LimpanCpp";
+        obj["d"]["properties"]["$device"] = "LimpanCpp";
+
+        message = obj.dump();
+        std::cout << obj.dump(4) << std::endl;
+
+        send(message);
+    }
+
+    void resume(std::string _token)
+    {
+        std::string message;
+        nlohmann::json obj;
+
+        obj["op"] = 6;
+        obj["d"]["token"] = _token;
+        obj["d"]["seq"] = heartbeatSeq;
+
+        message = obj.dump();
+        std::cout << obj.dump(4) << std::endl;
+
+        send(message);
+    }
 
     client ws_client;
 
@@ -274,6 +332,8 @@ private:
     int heartbeatSeq = 0;
 
     int sessionId = 0;
+
+    std::string bot_token = "DISCORD_BOT_SECRET";
 
     enum OPCodes
     {
