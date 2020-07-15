@@ -1,3 +1,6 @@
 [submodule "handybot-cpp/websocketpp"]
 	path = handybot-cpp/websocketpp
 	url = https://github.com/zaphoyd/websocketpp.git
+[submodule "handybot-cpp/limpanLibs"]
+	path = handybot-cpp/limpanLibs
+	url = git@github.com:linus-jansson/limpanLibs.git
