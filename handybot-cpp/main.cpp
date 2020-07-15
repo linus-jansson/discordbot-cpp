@@ -13,7 +13,7 @@ int main()
 {
     bool done = false;
     std::string input;
-    websocket_endpoint endpoint("NTI4OTc3MTM1NjEyOTg1MzY5.XwwFLA.FoG5yFqwqbu8K7r8BCoBpCPzl-Q");
+    websocket_endpoint endpoint("TOKEn");
 
     while (!done)
     {
