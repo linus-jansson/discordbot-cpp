@@ -1,7 +1,3 @@
-#include "websocket.cpp"
-
-#include "json.hpp"
-
 #include <cstdlib>
 #include <iostream>
 #include <map>
@@ -9,12 +5,15 @@
 #include <sstream>
 #include <functional>
 
+#include "websocket.cpp"
+
+#include "json.hpp"
 
 int main()
 {
     bool done = false;
     std::string input;
-    websocket_endpoint endpoint;
+    websocket_endpoint endpoint("NTI4OTc3MTM1NjEyOTg1MzY5.XwwFLA.FoG5yFqwqbu8K7r8BCoBpCPzl-Q");
 
     while (!done)
     {
@@ -46,10 +45,10 @@ int main()
             std::istringstream ss(input);
 
             std::string cmd;
-            
+
             std::string message = "{\"op\":1,\"d\":null}";
             // std::string message = "{\"op\":1}";
-            
+
             ss >> cmd;
 
             endpoint.send(message);
@@ -59,6 +58,7 @@ int main()
             std::stringstream ss(input);
 
             std::string cmd;
+          
             int id;
             int close_code = websocketpp::close::status::normal;
             std::string reason;
@@ -66,7 +66,7 @@ int main()
             ss >> cmd >> id >> close_code;
             std::getline(ss, reason);
 
-            endpoint.close(id, close_code, reason);
+            endpoint.close(close_code, reason);
         }
         else
         {
