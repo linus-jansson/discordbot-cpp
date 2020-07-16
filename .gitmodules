@@ -4,3 +4,9 @@
 [submodule "handybot-cpp/limpanLibs"]
 	path = handybot-cpp/limpanLibs
 	url = git@github.com:linus-jansson/limpanLibs.git
+[submodule "handybot-cpp/cpr"]
+	path = handybot-cpp/cpr
+	url = https://github.com/whoshuu/cpr.git
+[submodule "cpr"]
+	path = cpr
+	url = https://github.com/whoshuu/cpr.git
