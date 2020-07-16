@@ -5,72 +5,68 @@
 #include <sstream>
 #include <functional>
 
-#include "websocket.cpp"
-
 #include "json.hpp"
+#include <cpr/cpr.h>
+
+#include "websocket.cpp"
 
 int main()
 {
-    bool done = false;
+    bool done = true;
     std::string input;
-    websocket_endpoint endpoint("TOKEn");
+
+    // websocket_endpoint client("NTI4OTc3MTM1NjEyOTg1MzY5.Xw9Xiw.2WYU4HR5QFnT0pQ8A-smu2wgH4o"); // SNÄLLA LEAKA INTE DET HÄR IGEN :/
+
+    std::string bodymessage;
+
+    nlohmann::json obj;
+
+    obj["content"] = "Hello world";
+
+    bodymessage = obj.dump();
+
+    auto ssl = cpr::Ssl(cpr::ssl::TLSv1_2{});
+    cpr::Session session;
+
+    cpr::Header head;
+    head.insert({"Content-Type", "application/json"});
+    head.insert({"Authorization", "Bot NTI4OTc3MTM1NjEyOTg1MzY5.Xw9Xiw.2WYU4HR5QFnT0pQ8A-smu2wgH4o"});
+
+    session.SetUrl(cpr::Url{"https://discord.com/api/v6/channels/525450532094214154/messages"});
+    session.SetHeader(head);
+    session.SetBody(cpr::Body{bodymessage});
+    session.SetOption(cpr::VerifySsl(false));
+    // session.SetOption(ssl);
+
+    std::cout << "debug log" << std::endl;
+    // DOES NOT WORK ( NO response ) SSÖ Doesnt work. When making a normal http request everything works as normal
+    auto res = session.Post();
+
+    if (res.status_code != 200)
+    {
+        std::cerr << "Error [code=" << res.status_code << ", error=" << res.error.message << "] making request" << std::endl;
+    }
+    else
+    {
+        std::cout << "Request took " << res.elapsed << std::endl;
+        std::cout << "Body:" << std::endl
+                  << res.text;
+    }
 
     while (!done)
     {
-        std::cout << "Enter Command: ";
         std::getline(std::cin, input);
-
         if (input == "quit")
-        {
             done = true;
-        }
-        else if (input == "help")
+        else if (input == "post")
         {
-            std::cout
-                << "\nCommand List:\n"
-                << "connect <ws uri>\n"
-                << "send <connection id> <message>\n"
-                << "close <connection id> [<close code:default=1000>] [<close reason>]\n"
-                << "show <connection id>\n"
-                << "help: Display this help text\n"
-                << "quit: Exit the program\n"
-                << std::endl;
-        }
-        else if (input.substr(0, 7) == "connect")
-        {
-            endpoint.connect();
-        }
-        else if (input.substr(0, 4) == "send")
-        {
-            std::istringstream ss(input);
-
-            std::string cmd;
-
-            std::string message = "{\"op\":1,\"d\":null}";
-            // std::string message = "{\"op\":1}";
-
-            ss >> cmd;
-
-            endpoint.send(message);
-        }
-        else if (input.substr(0, 5) == "close")
-        {
-            std::stringstream ss(input);
-
-            std::string cmd;
-          
-            int id;
-            int close_code = websocketpp::close::status::normal;
-            std::string reason;
-
-            ss >> cmd >> id >> close_code;
-            std::getline(ss, reason);
-
-            endpoint.close(close_code, reason);
-        }
-        else
-        {
-            std::cout << "> Unrecognized Command" << std::endl;
+            try
+            {
+            }
+            catch (const std::exception &e)
+            {
+                std::cerr << e.what() << '\n';
+            }
         }
     }
 
