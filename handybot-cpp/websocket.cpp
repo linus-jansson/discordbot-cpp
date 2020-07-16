@@ -136,6 +136,7 @@ public:
                 }
                 break;
             case HEARTBEAT:
+                // SHOULD SEND A HEARTACKE BACK
             case IDENTIFY:
             case STATUS_UPDATE:
             case VOICE_SERVER_PING:
