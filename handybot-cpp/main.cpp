@@ -15,7 +15,7 @@ int main()
     bool done = true;
     std::string input;
 
-    // websocket_endpoint client("NTI4OTc3MTM1NjEyOTg1MzY5.Xw9Xiw.2WYU4HR5QFnT0pQ8A-smu2wgH4o"); // SNÄLLA LEAKA INTE DET HÄR IGEN :/
+    // websocket_endpoint client("XXXXXXXXXXXXXXXXXX"); // SNÄLLA LEAKA INTE DET HÄR IGEN :/
 
     std::string bodymessage;
 
@@ -30,7 +30,7 @@ int main()
 
     cpr::Header head;
     head.insert({"Content-Type", "application/json"});
-    head.insert({"Authorization", "Bot NTI4OTc3MTM1NjEyOTg1MzY5.Xw9Xiw.2WYU4HR5QFnT0pQ8A-smu2wgH4o"});
+    head.insert({"Authorization", "Bot XXXXXXXXXXXXXXXXXX"});
 
     session.SetUrl(cpr::Url{"https://discord.com/api/v6/channels/525450532094214154/messages"});
     session.SetHeader(head);
