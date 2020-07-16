@@ -7,6 +7,3 @@
 [submodule "handybot-cpp/cpr"]
 	path = handybot-cpp/cpr
 	url = https://github.com/whoshuu/cpr.git
-[submodule "cpr"]
-	path = cpr
-	url = https://github.com/whoshuu/cpr.git
