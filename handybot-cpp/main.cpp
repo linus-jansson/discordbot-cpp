@@ -8,50 +8,61 @@
 #include "json.hpp"
 #include <cpr/cpr.h>
 
-#include "websocket.cpp"
+#include "client.hpp"
 
 int main()
 {
     bool done = true;
     std::string input;
 
-    // websocket_endpoint client("XXXXXXXXXXXXXXXXXX"); // SNÄLLA LEAKA INTE DET HÄR IGEN :/
+    handypp::client client("XXXXXXXXXXXXXXXXXXXX");
 
-    std::string bodymessage;
+    client.run();
 
-    nlohmann::json obj;
-
-    obj["content"] = "Hello world";
-
-    bodymessage = obj.dump();
-
-    auto ssl = cpr::Ssl(cpr::ssl::TLSv1_2{});
-    cpr::Session session;
-
-    cpr::Header head;
-    head.insert({"Content-Type", "application/json"});
-    head.insert({"Authorization", "Bot XXXXXXXXXXXXXXXXXX"});
-
-    session.SetUrl(cpr::Url{"https://discord.com/api/v6/channels/525450532094214154/messages"});
-    session.SetHeader(head);
-    session.SetBody(cpr::Body{bodymessage});
-    session.SetOption(cpr::VerifySsl(false));
-    // session.SetOption(ssl);
-
-    std::cout << "debug log" << std::endl;
-    // DOES NOT WORK ( NO response ) SSÖ Doesnt work. When making a normal http request everything works as normal
-    auto res = session.Post();
-
-    if (res.status_code != 200)
+    while (client.isReady())
     {
-        std::cerr << "Error [code=" << res.status_code << ", error=" << res.error.message << "] making request" << std::endl;
+        std::cout << "Bot is running!\n";
     }
-    else
-    {
-        std::cout << "Request took " << res.elapsed << std::endl;
-        std::cout << "Body:" << std::endl
-                  << res.text;
-    }
+    
+    
+
+    // std::string bodymessage;
+
+    // nlohmann::json obj;
+
+    // obj["content"] = "Hello world";
+
+    // bodymessage = obj.dump();
+
+    // auto ssl = cpr::Ssl(cpr::ssl::TLSv1_2{});
+    // cpr::Session session;
+
+    // cpr::Header head;
+    // head.insert({"Content-Type", "application/json"});
+    // head.insert({"Authorization", "Bot XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXxxx"});
+
+    // session.SetUrl(cpr::Url{"https://discord.com/api/v6/channels/706041540690313288/messages"});
+    // session.SetHeader(head);
+    // session.SetBody(cpr::Body{bodymessage});
+    // session.SetOption(cpr::VerifySsl(false)); // Don't use this forever. Not safe and can cause man in the middle attacks. Before official release get certificates to work
+    // // session.SetOption(ssl);
+
+    // std::cout << "debug log" << std::endl;
+
+    // auto res = session.Post();
+
+    // //  DEBUG for checking if the message was succsesfull
+    // if (res.status_code != 200)
+    // {
+    //     std::cerr << "Error [code=" << res.status_code << ", error=" << res.error.message << "] making request" << std::endl;
+    // }
+    // else
+    // {
+    //     std::cout << "Request took " << res.elapsed << std::endl;
+    //     std::cout << "Body:" << std::endl
+    //               << res.text;
+    // }
+
 
     while (!done)
     {
